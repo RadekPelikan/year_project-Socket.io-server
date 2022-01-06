@@ -22,7 +22,9 @@ app.use(express.static("public"));
 //     res.sendFile(__dirname + "/index.html");
 // });
 
-require("./socket/tools")(io);
+require("./socket/connections/_connection")(io);
+require("./socket/connections/tools")(io);
+require("./socket/connections/chat")(io);
 
 server.listen(PORT, () => {
   console.log(`App is running on ${PORT}`);
