@@ -25,6 +25,7 @@ app.use(express.static("public"));
 require("./socket/connections/_connection")(io);
 require("./socket/connections/tools")(io);
 require("./socket/connections/chat")(io);
+require("./socket/connections/canvas")(io);
 
 server.listen(PORT, () => {
   console.log(`App is running on ${PORT}`);
