@@ -13,6 +13,10 @@ const io = new Server(server, {
 });
 const PORT = 3000 | process.env.PORT;
 
+const canvasHandlers = require("./socket/canvas")
+const toolsHandlers = require("./socket/tools")
+const chatHandlers = require("./socket/chat")
+
 app.use(morgan("dev"));
 app.use(express.json());
 
@@ -22,10 +26,13 @@ app.use(express.static("public"));
 //     res.sendFile(__dirname + "/index.html");
 // });
 
-require("./socket/connections/_connection")(io);
-require("./socket/connections/canvas")(io);
-require("./socket/connections/tools")(io);
-require("./socket/connections/chat")(io);
+const onConnection = (socket) => {
+  canvasHandlers(io, socket);
+  toolsHandlers(io, socket);
+  chatHandlers(io, socket);
+}
+
+io.on("connection", onConnection);
 
 server.listen(PORT, () => {
   console.log(`App is running on ${PORT}`);
