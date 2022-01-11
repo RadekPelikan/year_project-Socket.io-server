@@ -1,4 +1,4 @@
-// const connectionMiddleware = require("../middlewares/connection");
+// const connectionMiddleware = require("../middlewares/_connection");
 
 const connection = (io) => {
   io.on("connection", (socket) => {

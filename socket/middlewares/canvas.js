@@ -1,5 +1,5 @@
 function changeBg(data) {
-  console.log(data)
+  // console.log(data)
   this.broadcast.emit("canvas-changeBg", data);
 }
 

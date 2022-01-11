@@ -1,5 +1,5 @@
 function pencil(data) {
-  console.log(data)
+  // console.log(data)
   this.broadcast.emit("tool-pencil", data);
 }
 
@@ -9,6 +9,7 @@ function eraser(data) {
 }
 
 function bucket(data) {
+  // console.log(data)
   this.broadcast.emit("tool-bucket", data);
 }
 
