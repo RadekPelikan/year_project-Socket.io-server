@@ -11,28 +11,20 @@ const io = new Server(server, {
     origin: "*",
   },
 });
-const PORT = 3000 | process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
-const canvasHandlers = require("./socket/canvas")
-const toolsHandlers = require("./socket/tools")
-const chatHandlers = require("./socket/chat")
+const socketEvents = require("./socket")
 
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.use(express.static("public"));
+app.use(express.static("../public"));
 
 // app.get("/", (req, res) => {
 //     res.sendFile(__dirname + "/index.html");
 // });
 
-const onConnection = (socket) => {
-  canvasHandlers(io, socket);
-  toolsHandlers(io, socket);
-  chatHandlers(io, socket);
-}
-
-io.on("connection", onConnection);
+socketEvents(io)
 
 server.listen(PORT, () => {
   console.log(`App is running on ${PORT}`);
