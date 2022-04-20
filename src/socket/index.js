@@ -9,6 +9,7 @@ const canvEvents = require("./canvas");
 const user = {
   id,
   name,
+  room id
 }
 
 // Rooms identified by id
@@ -66,6 +67,7 @@ module.exports = (io) => {
     socket.on("room:create", ({ room }) => {
       roomEvents.create({ socket, rooms, room });
       io.emit("room:create:done", { rooms });
+      socket.emit("room:create:done:join", { rooms });
     });
 
     socket.on("room:delete", ({ room, user }) => {
@@ -77,21 +79,28 @@ module.exports = (io) => {
       io.emit("room:get:done", { rooms });
     });
 
-    socket.on("room:user-join", ({ room, user }) => {
-      roomEvents.userJoin({ socket, rooms, room, user });
+    socket.on("room:user-join", ({ room, user, password }) => {
+      roomEvents.userJoin({ socket, rooms, room, users, user, password });
       io.emit("room:get:done", { rooms });
-      socket.emit("room:user-join:done", { room });
-    });
-
-    socket.on("room:user-get-canvas:done", ({ canvas, user }) => {
-      roomEvents.userGetCanvas({ canvas, user });
-      socket.emit("room:user", { canvas }); // Only to that user
     });
 
     socket.on("room:user-left", ({ room, user }) => {
       roomEvents.userLeft({ socket, rooms, room, user });
       io.emit("room:get:done", { rooms });
       socket.emit("room:user-left:done", { room });
+    });
+
+    socket.on("room:exists", ({ id }) => {
+      roomEvents.exists({ socket, rooms, id });
+    });
+
+    socket.on("room:switch-open", ({ room, user }) => {
+      roomEvents.switchOpen({ socket, rooms, room, user });
+      io.emit("room:get:done", { rooms });
+    });
+
+    socket.on("room:get-open", ({ room, user }) => {
+      roomEvents.getOpen({ socket, rooms, room, user });
     });
 
     // Tool used: pencil / eraser / bucket
@@ -125,11 +134,12 @@ module.exports = (io) => {
     });
 
     socket.on("disconnect", () => {
-      rooms.forEach((room) =>
+      rooms.forEach((room, indexR) =>
         room.users.forEach((user, index) => {
           if (user.id !== socket.data.user.id) return;
           room.users.splice(index, 1);
-          console.log(room);
+          if (room.users.length === 0) rooms.splice(indexR, 1)
+          io.emit("room:get:done", { rooms });
         })
       );
       const index = users.findIndex((item) => item.id === socket.data.user.id);

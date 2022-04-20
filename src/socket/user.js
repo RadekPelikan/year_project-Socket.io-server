@@ -2,10 +2,11 @@ const generateID = require("../helpers/generateID");
 
 const defaultName = "user";
 
-exports.create = ({socket, users}) => {
+exports.create = ({socket, users, room}) => {
   const user = {
     id: generateID(users),
     name: defaultName,
+    room: room || null,
   };
   socket.data.user = user;
   users.push(user);
