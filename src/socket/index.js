@@ -79,15 +79,15 @@ module.exports = (io) => {
       io.emit("room:get:done", { rooms });
     });
 
-    socket.on("room:user-join", ({ room, user, password }) => {
-      roomEvents.userJoin({ socket, rooms, room, users, user, password });
+    socket.on("room:user-join", ({ room, user }) => {
+      roomEvents.userJoin({ socket, rooms, room, users, user });
       io.emit("room:get:done", { rooms });
     });
 
     socket.on("room:user-left", ({ room, user }) => {
       roomEvents.userLeft({ socket, rooms, room, user });
       io.emit("room:get:done", { rooms });
-      socket.emit("room:user-left:done", { room });
+      io.emit("room:user-left:done", { room });
     });
 
     socket.on("room:exists", ({ id }) => {
@@ -103,34 +103,52 @@ module.exports = (io) => {
       roomEvents.getOpen({ socket, rooms, room, user });
     });
 
+    socket.on("room:get-size", ({ user, room }) => {
+      roomEvents.getSize({ socket, rooms, room, user })
+    })
+
     // Tool used: pencil / eraser / bucket
-    socket.on("room:canvas:tool", ({ room, user }) => {
-      canvEvents.tool({ socket, rooms, users, room, user });
-      socket.emit("room:canvas:tool:done", { room, user });
+    socket.on("room:canvas:tool", ({ room, user, tool}) => {
+      canvEvents.tool({ socket, rooms, users, room, user, tool });
+      socket.to(socket.data.user.room).emit("room:canvas:tool:done", { room, user, tool });
     });
 
     // Chane bg color of canvas
     socket.on("room:canvas:color", ({ room, user }) => {
       canvEvents.color({ socket, rooms, users, room, user });
-      socket.emit("room:canvas:color:done", { room, user });
+      socket.to(socket.data.user.room).emit("room:canvas:color:done", { room, user });
+    });
+
+    // Layers create
+    socket.on("room:canvas:layer-create", ({ room, user }) => {
+      const id = canvEvents.layerCreate({ socket, rooms, users, room, user});
+      socket.emit("room:canvas:layer-create:done", { id });
+      socket.to(socket.data.user.room).emit("room:canvas:layer-create:done", { id });
     });
 
     // Layers moved
     socket.on("room:canvas:layer-move", ({ room, user }) => {
       canvEvents.layerMove({ socket, rooms, users, room, user });
-      socket.emit("room:canvas:layer-move:done", { room, user });
+      socket.to(socket.data.user.room).emit("room:canvas:layer-move:done", { room, user });
     });
 
     // Layer delete
-    socket.on("room:canvas:layer-delete", ({ room, user }) => {
-      canvEvents.layerDelete({ socket, rooms, users, room, user });
-      socket.emit("room:canvas:layer-delete:done", { room, user });
+    socket.on("room:canvas:layer-delete", ({ room, user, id }) => {
+      canvEvents.layerDelete({ socket, rooms, users, room, user ,id });
+      socket.emit("room:canvas:layer-delete:done", { id });
+      socket.to(socket.data.user.room).emit("room:canvas:layer-delete:done", { room, user, id });
+    });
+
+    // Layers get
+    socket.on("room:canvas:layer-get", ({ room, user }) => {
+      const roomN = rooms.filter((item) => item.id === room.id)[0]
+      socket.emit("room:canvas:layer-get:done", { layers: roomN.layers });
     });
 
     // Switch if layer is visible or not
     socket.on("room:canvas:layer-visible", ({ room, user }) => {
       canvEvents.layerVisible({ socket, rooms, users, room, user });
-      socket.emit("room:canvas:layer-visible:done", { room, user });
+      socket.to(socket.data.user.room).emit("room:canvas:layer-visible:done", { room, user });
     });
 
     socket.on("disconnect", () => {
