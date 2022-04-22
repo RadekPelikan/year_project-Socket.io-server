@@ -15,6 +15,7 @@ exports.create = ({ socket, rooms, room }) => {
     max: room.max > 0 ? room.max : -1,
     size: room.size || { width: 1000, height: 1000 },
     layers: [],
+    color: 240
   };
   if (roomN.password) {
     passwords.push({

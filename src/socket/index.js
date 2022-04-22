@@ -82,6 +82,9 @@ module.exports = (io) => {
     socket.on("room:user-join", ({ room, user }) => {
       roomEvents.userJoin({ socket, rooms, room, users, user });
       io.emit("room:get:done", { rooms });
+      const roomN = rooms.filter((item) => item.id === room.id)[0];
+      socket.to(room.id).emit("room:user-join:done", { room, users: roomN.users });
+      socket.emit("room:user-join:done", { room, users: roomN.users });
     });
 
     socket.on("room:user-left", ({ room, user }) => {
@@ -89,6 +92,12 @@ module.exports = (io) => {
       io.emit("room:get:done", { rooms });
       io.emit("room:user-left:done", { room });
     });
+
+    socket.on("room:user-get", ({room}) => {
+      const roomN = rooms.filter((item) => item.id === room.id)[0];
+      if (roomN === undefined) return
+      socket.emit("room:user-get:done", {users: roomN.users})
+    })
 
     socket.on("room:exists", ({ id }) => {
       roomEvents.exists({ socket, rooms, id });
@@ -114,9 +123,9 @@ module.exports = (io) => {
     });
 
     // Chane bg color of canvas
-    socket.on("room:canvas:color", ({ room, user }) => {
-      canvEvents.color({ socket, rooms, users, room, user });
-      socket.to(socket.data.user.room).emit("room:canvas:color:done", { room, user });
+    socket.on("room:canvas:color", ({ room, user, color}) => {
+      canvEvents.color({ socket, rooms, users, room, user, color });
+      
     });
 
     // Layers create
@@ -127,9 +136,8 @@ module.exports = (io) => {
     });
 
     // Layers moved
-    socket.on("room:canvas:layer-move", ({ room, user }) => {
-      canvEvents.layerMove({ socket, rooms, users, room, user });
-      socket.to(socket.data.user.room).emit("room:canvas:layer-move:done", { room, user });
+    socket.on("room:canvas:layer-move", ({ room, user, indexes }) => {
+      canvEvents.layerMove({ socket, rooms, users, room, user, indexes });
     });
 
     // Layer delete
