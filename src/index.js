@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const morgan = require("morgan");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -18,11 +19,12 @@ const socketEvents = require("./socket")
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.use(express.static("../public"));
+app.use(express.static('public'))
 
-// app.get("/", (req, res) => {
-//     res.sendFile(__dirname + "/index.html");
-// });
+app.get("/*", (req, res) => {
+  if (req.path === "/") return
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
+});
 socketEvents(io)
 
 server.listen(PORT, () => {
