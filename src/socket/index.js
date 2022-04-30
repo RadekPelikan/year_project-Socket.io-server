@@ -173,5 +173,6 @@ module.exports = (io) => {
       users.splice(index, 1);
       console.log(`{${users.length}} ${socket.data.user.name} disconnected `);
     });
+    
   });
 };
